@@ -10,7 +10,7 @@ interface ExportPDFProps {
   patientName?: string;
 }
 
-export function ExportPDFButton({ elementId, patientName = 'Pasien_MediCheck' }: ExportPDFProps) {
+export function ExportPDFButton({ elementId, patientName = 'Pasien_GlukoRisk' }: ExportPDFProps) {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -55,7 +55,7 @@ export function ExportPDFButton({ elementId, patientName = 'Pasien_MediCheck' }:
         heightLeft -= pageHeight;
       }
 
-      const cleanFileName = `MediCheck_SDG3_Hasil_Skrining_${new Date().toISOString().slice(0, 10)}.pdf`;
+      const cleanFileName = `GlukoRisk_SDG3_Hasil_Skrining_${new Date().toISOString().slice(0, 10)}.pdf`;
       pdf.save(cleanFileName);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 4000);

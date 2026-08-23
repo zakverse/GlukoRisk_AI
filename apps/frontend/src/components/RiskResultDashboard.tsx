@@ -65,7 +65,7 @@ export function RiskResultDashboard({ result, onReset }: Props) {
         {/* PDF Header Logo inside report */}
         <div className="hidden print:flex items-center justify-between pb-4 border-b border-slate-800">
           <div>
-            <h1 className="text-xl font-bold text-teal-400">MediCheck AI - Laporan Skrining Kesehatan Preventif</h1>
+            <h1 className="text-xl font-bold text-teal-400">GlukoRisk AI - Laporan Skrining Kesehatan Preventif</h1>
             <p className="text-xs text-slate-400">Poin SDG 3: Kehidupan Sehat & Sejahtera (UN Sustainable Development Goals)</p>
           </div>
           <p className="text-xs text-slate-400">{result.timestamp}</p>

@@ -11,7 +11,7 @@ export function Footer() {
               <Globe2 className="h-5 w-5 text-teal-400" /> Komitmen SDG 3 UN
             </h3>
             <p className="text-slate-400 text-xs leading-relaxed">
-              MediCheck AI mendukung Tujuan Pembangunan Berkelanjutan (SDG 3 Target 3.4) untuk mengurangi 1/3 kematian dini akibat Penyakit Tidak Menular (PTM) seperti Diabetes Melitus dan Penyakit Jantung melalui deteksi dini berbasis Machine Learning.
+              GlukoRisk AI mendukung Tujuan Pembangunan Berkelanjutan (SDG 3 Target 3.4) untuk mengurangi 1/3 kematian dini akibat Penyakit Tidak Menular (PTM) seperti Diabetes Melitus dan Penyakit Jantung melalui deteksi dini berbasis Machine Learning.
             </p>
           </div>
 
@@ -35,7 +35,7 @@ export function Footer() {
         </div>
 
         <div className="pt-8 border-t border-slate-800/60 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-500 gap-4">
-          <p>© {new Date().getFullYear()} MediCheck AI - Platform Skrining Risiko Kesehatan Preventif.</p>
+          <p>© {new Date().getFullYear()} GlukoRisk AI - Platform Skrining Risiko Kesehatan Preventif.</p>
           <p className="flex items-center gap-1">
             Dikembangkan dengan <Heart className="h-3.5 w-3.5 text-rose-500 fill-rose-500" /> untuk Kesehatan Masyarakat Indonesia
           </p>

@@ -15,7 +15,7 @@ export function Navbar() {
           <div>
             <div className="flex items-center space-x-2">
               <span className="text-xl font-extrabold tracking-tight text-white">
-                MediCheck <span className="health-gradient-text">AI</span>
+                GlukoRisk <span className="health-gradient-text">AI</span>
               </span>
               <span className="px-2 py-0.5 text-[10px] font-semibold tracking-wider text-teal-300 bg-teal-950/80 border border-teal-500/30 rounded-full">
                 PREVENTIVE ML
