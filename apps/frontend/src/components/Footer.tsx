@@ -1,44 +1,85 @@
 import React from 'react';
-import { Heart, Globe2, ShieldAlert } from 'lucide-react';
+import Link from 'next/link';
+import { HeartPulse, Github, Twitter, Shield } from 'lucide-react';
 
 export function Footer() {
+  const currentYear = new Date().getFullYear();
+
   return (
-    <footer className="bg-slate-950 border-t border-slate-800/80 mt-20 text-slate-400 text-sm">
+    <footer className="mt-24 border-t border-white/[0.06]" style={{ background: 'rgba(6, 12, 26, 0.95)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-          <div>
-            <h3 className="text-white font-bold text-base mb-3 flex items-center gap-2">
-              <Globe2 className="h-5 w-5 text-teal-400" /> Komitmen SDG 3 UN
-            </h3>
-            <p className="text-slate-400 text-xs leading-relaxed">
-              GlukoRisk AI mendukung Tujuan Pembangunan Berkelanjutan (SDG 3 Target 3.4) untuk mengurangi 1/3 kematian dini akibat Penyakit Tidak Menular (PTM) seperti Diabetes Melitus dan Penyakit Jantung melalui deteksi dini berbasis Machine Learning.
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+          {/* Brand */}
+          <div className="md:col-span-2 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-sky-500 to-teal-500 flex items-center justify-center shadow-lg">
+                <HeartPulse className="h-5 w-5 text-white" />
+              </div>
+              <span className="text-lg font-black text-white">
+                MediRisk <span className="health-gradient-text">AI</span>
+              </span>
+            </div>
+            <p className="text-sm text-slate-400 leading-relaxed max-w-xs">
+              Platform skrining kesehatan preventif berbasis AI untuk membantu memahami faktor risiko diabetes dan penyakit kardiovaskular secara dini.
             </p>
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-950/50 border border-emerald-500/20 w-fit">
+              <div className="h-6 w-6 rounded bg-emerald-600 flex items-center justify-center text-white font-black text-[11px]">3</div>
+              <span className="text-xs font-semibold text-emerald-400">SDG 3 — Kehidupan Sehat & Sejahtera</span>
+            </div>
           </div>
 
-          <div>
-            <h3 className="text-white font-bold text-base mb-3">Model Machine Learning</h3>
-            <ul className="text-xs space-y-2 text-slate-400">
-              <li>• Train dataset: CDC BRFSS 2015 Health Indicators (253,680 responden)</li>
-              <li>• Algoritma: XGBoost Classifier & Random Forest Ensemble</li>
-              <li>• Metrik Evaluasi: ROC-AUC 0.82+, Recall Penyakit Tanda Awal 84%</li>
+          {/* Links */}
+          <div className="space-y-4">
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Navigasi</p>
+            <ul className="space-y-2.5">
+              {[
+                { href: '/', label: 'Beranda' },
+                { href: '/assessment', label: 'Mulai Skrining' },
+                { href: '/history', label: 'Riwayat Skrining' },
+                { href: '/about', label: 'Tentang Kami' },
+              ].map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="text-sm text-slate-400 hover:text-sky-400 transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
-          <div>
-            <h3 className="text-white font-bold text-base mb-3 flex items-center gap-2">
-              <ShieldAlert className="h-5 w-5 text-amber-400" /> Penafian Medis (Disclaimer)
-            </h3>
-            <p className="text-slate-400 text-xs leading-relaxed">
-              Hasil kalkulator ini bertujuan untuk asesmen risiko preventif dan edukasi publik, bukan merupakan diagnosis medis final. Selalu konsultasikan kondisi kesehatan Anda kepada dokter spesialis atau tenaga medis profesional.
-            </p>
+          {/* Tech */}
+          <div className="space-y-4">
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Teknologi</p>
+            <ul className="space-y-2.5 text-sm text-slate-400">
+              <li>Next.js + TypeScript</li>
+              <li>Python FastAPI</li>
+              <li>Random Forest / XGBoost</li>
+              <li>Dataset BRFSS 2015</li>
+            </ul>
           </div>
         </div>
 
-        <div className="pt-8 border-t border-slate-800/60 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-500 gap-4">
-          <p>© {new Date().getFullYear()} GlukoRisk AI - Platform Skrining Risiko Kesehatan Preventif.</p>
-          <p className="flex items-center gap-1">
-            Dikembangkan dengan <Heart className="h-3.5 w-3.5 text-rose-500 fill-rose-500" /> untuk Kesehatan Masyarakat Indonesia
-          </p>
+        {/* Disclaimer */}
+        <div className="mt-10 pt-8 border-t border-white/[0.06]">
+          <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-950/20 border border-amber-500/15 mb-6">
+            <Shield className="h-4 w-4 text-amber-400 mt-0.5 shrink-0" />
+            <p className="text-xs text-slate-400 leading-relaxed">
+              <span className="font-semibold text-amber-400">Perhatian Medis: </span>
+              MediRisk AI hanya digunakan untuk tujuan skrining dan edukasi kesehatan. Hasil estimasi risiko tidak dimaksudkan sebagai diagnosis medis atau pengganti konsultasi dengan tenaga kesehatan. Selalu konsultasikan kondisi kesehatan Anda dengan dokter atau tenaga medis profesional.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+            <p>© {currentYear} MediRisk AI. Dibuat untuk mendukung SDG 3 — Kesehatan yang Baik dan Kesejahteraan.</p>
+            <div className="flex items-center gap-4">
+              <span className="px-2.5 py-1 rounded-full bg-slate-800 border border-slate-700 font-medium">
+                v1.0.0 — Demo Mode
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </footer>
