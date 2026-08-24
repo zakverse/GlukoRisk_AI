@@ -119,7 +119,7 @@ export function Step1Demographics({ formData, onChange }: Step1Props) {
           }`}>
             {bmiInfo.category === 'Normal' ? 'Ideal (Normal)' :
              bmiInfo.category === 'Overweight' ? 'Kelebihan Berat' :
-             bmiInfo.category === 'Obese' ? 'Obesitas' : 'Kekurangan Berat'}
+             bmiInfo.category.startsWith('Obese') ? 'Obesitas' : 'Kekurangan Berat'}
           </p>
         </div>
       </div>
