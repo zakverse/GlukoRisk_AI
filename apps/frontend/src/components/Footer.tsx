@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { HeartPulse, Github, Twitter, Shield } from 'lucide-react';
+import { HeartPulse, Shield } from 'lucide-react';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
