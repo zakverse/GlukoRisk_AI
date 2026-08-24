@@ -1,67 +1,92 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Download, FileText, Loader2, CheckCircle } from 'lucide-react';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import { FileDown, Loader2 } from 'lucide-react';
 
-interface ExportPDFProps {
+interface Props {
   elementId: string;
-  patientName?: string;
+  filename?: string;
 }
 
-export function ExportPDFButton({ elementId, patientName = 'Pasien_GlukoRisk' }: ExportPDFProps) {
+export function ExportPDFButton({ elementId, filename = 'MediRisk-AI-Laporan-Skrining' }: Props) {
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
 
-  const handleExportPDF = async () => {
+  const handleExport = async () => {
     setLoading(true);
-    setSuccess(false);
-
     try {
       const element = document.getElementById(elementId);
       if (!element) {
-        throw new Error('Elemen laporan tidak ditemukan.');
+        alert('Konten laporan tidak ditemukan.');
+        return;
       }
 
-      // Capture high quality canvas snapshot
+      const { default: html2canvas } = await import('html2canvas');
+      const { default: jsPDF } = await import('jspdf');
+
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
-        backgroundColor: '#0f172a',
+        backgroundColor: '#0a0f1e',
         logging: false,
+        windowWidth: 900,
       });
 
       const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-      });
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 297; // A4 height in mm
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = pdfWidth;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
       let heightLeft = imgHeight;
       let position = 0;
 
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+      // Add header
+      pdf.setFillColor(10, 15, 30);
+      pdf.rect(0, 0, pdfWidth, 15, 'F');
+      pdf.setTextColor(14, 165, 233);
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('MediRisk AI — Laporan Skrining Kesehatan Preventif', pdfWidth / 2, 9, { align: 'center' });
+      pdf.setTextColor(100, 116, 139);
+      pdf.setFontSize(8);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text('Hasil ini merupakan estimasi skrining berbasis AI, bukan diagnosis medis.', pdfWidth / 2, 13, { align: 'center' });
 
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
+      // Add image (content)
+      position = 17;
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pdfHeight - position;
+
+      while (heightLeft > 0) {
         pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+        position = -(pdfHeight - 17);
+        pdf.addImage(imgData, 'PNG', 0, position - (imgHeight - heightLeft), imgWidth, imgHeight);
+        heightLeft -= pdfHeight;
       }
 
-      const cleanFileName = `GlukoRisk_SDG3_Hasil_Skrining_${new Date().toISOString().slice(0, 10)}.pdf`;
-      pdf.save(cleanFileName);
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 4000);
-    } catch (err) {
-      console.error('Gagal mengenerate PDF:', err);
-      alert('Gagal mendownload PDF. Silakan coba kembali.');
+      // Footer on last page
+      const totalPages = pdf.internal.pages.length - 1;
+      for (let i = 1; i <= totalPages; i++) {
+        pdf.setPage(i);
+        pdf.setFillColor(10, 15, 30);
+        pdf.rect(0, pdfHeight - 10, pdfWidth, 10, 'F');
+        pdf.setTextColor(71, 85, 105);
+        pdf.setFontSize(7);
+        pdf.text(
+          `MediRisk AI • Skrining Kesehatan Preventif • SDG 3 — Kehidupan Sehat & Sejahtera • Halaman ${i} dari ${totalPages}`,
+          pdfWidth / 2,
+          pdfHeight - 4,
+          { align: 'center' }
+        );
+      }
+
+      const dateStr = new Date().toISOString().split('T')[0];
+      pdf.save(`${filename}-${dateStr}.pdf`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Gagal mengunduh PDF. Silakan coba lagi.');
     } finally {
       setLoading(false);
     }
@@ -69,29 +94,18 @@ export function ExportPDFButton({ elementId, patientName = 'Pasien_GlukoRisk' }:
 
   return (
     <button
-      onClick={handleExportPDF}
+      onClick={handleExport}
       disabled={loading}
-      className={`px-5 py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all border ${
-        success
-          ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-          : 'bg-gradient-to-r from-teal-500 to-sky-500 hover:from-teal-400 hover:to-sky-400 text-slate-950 font-extrabold border-teal-300 shadow-lg shadow-teal-500/20'
+      className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all border ${
+        loading
+          ? 'opacity-60 cursor-not-allowed border-white/10 text-slate-400'
+          : 'border-sky-500/30 text-sky-300 hover:bg-sky-500/10 hover:border-sky-500/50 hover:text-sky-200'
       }`}
     >
       {loading ? (
-        <>
-          <Loader2 className="h-4 w-4 animate-spin text-slate-950" />
-          <span>Mengompilasi PDF...</span>
-        </>
-      ) : success ? (
-        <>
-          <CheckCircle className="h-4 w-4 text-emerald-400" />
-          <span>PDF Berhasil Diunduh!</span>
-        </>
+        <><Loader2 className="h-4 w-4 animate-spin" /> Mengunduh...</>
       ) : (
-        <>
-          <Download className="h-4 w-4 text-slate-950" />
-          <span>Ekspor Hasil Skrining Ke PDF</span>
-        </>
+        <><FileDown className="h-4 w-4" /> Unduh PDF</>
       )}
     </button>
   );

@@ -1,47 +1,54 @@
 export interface ClinicalDataInput {
-  // Step 1: Informasi Dasar & Demografi
-  age: number; // Usia dalam tahun (misal: 45)
-  ageCategory?: number; // Skala BRFSS 1-13
+  // Step 1: Data Dasar
+  age: number;
   sex: number; // 0 = Perempuan, 1 = Laki-laki
-  heightCm: number; // Tinggi badan (cm)
-  weightKg: number; // Berat badan (kg)
-  education: number; // 1-6 (BRFSS scale)
-  income: number; // 1-8 (BRFSS scale)
+  heightCm: number;
+  weightKg: number;
+  education: number; // 1-6
+  income: number; // 1-8
 
-  // Step 2: Indikator Klinis
-  highBP: number; // 0 = Tidak, 1 = Ya (Tekanan Darah Tinggi)
-  highChol: number; // 0 = Tidak, 1 = Ya (Kolesterol Tinggi)
-  cholCheck: number; // 0 = Tidak, 1 = Ya (Cek Kolesterol 5 thn terakhir)
-  stroke: number; // 0 = Tidak, 1 = Ya (Riwayat Stroke)
-  heartDiseaseorAttack: number; // 0 = Tidak, 1 = Ya (Penyakit Jantung/Serangan)
+  // Step 2: Gaya Hidup
+  smoker: number; // 0 = Tidak, 1 = Ya
+  physActivity: number; // 0 = Tidak, 1 = Ya
+  fruits: number; // 0 = Tidak, 1 = Ya
+  veggies: number; // 0 = Tidak, 1 = Ya
+  hvyAlcoholConsump: number; // 0 = Tidak, 1 = Ya
+  genHlth: number; // 1-5 (1=Sangat Baik, 5=Buruk)
 
-  // Step 3: Gaya Hidup & Nutrisi
-  smoker: number; // 0 = Tidak, 1 = Perokok (>=100 batang seumur hidup)
-  physActivity: number; // 0 = Tidak, 1 = Ya (Olahraga 30 hari terakhir)
-  fruits: number; // 0 = Tidak, 1 = Konsumsi Buah harian
-  veggies: number; // 0 = Tidak, 1 = Konsumsi Sayur harian
-  hvyAlcoholConsump: number; // 0 = Tidak, 1 = Konsumsi Alkohol Berat
+  // Step 3: Indikator Kesehatan
+  highBP: number; // 0 = Tidak, 1 = Ya
+  highChol: number; // 0 = Tidak, 1 = Ya
+  cholCheck: number; // 0 = Tidak, 1 = Ya (cek kolesterol 5 thn terakhir)
+  stroke: number; // 0 = Tidak, 1 = Ya
+  heartDiseaseorAttack: number; // 0 = Tidak, 1 = Ya
+  diffWalk: number; // 0 = Tidak, 1 = Ya
+  mentHlth: number; // 0-30
+  physHlth: number; // 0-30
+  anyHealthcare: number; // 0 = Tidak, 1 = Ya
+  noDocbcCost: number; // 0 = Tidak, 1 = Ya
 
-  // Step 4: Status Kesehatan Umum
-  genHlth: number; // 1 = Sangat Baik, 2 = Baik Sekali, 3 = Baik, 4 = Cukup, 5 = Buruk
-  mentHlth: number; // 0-30 Hari kesehatan mental terganggu
-  physHlth: number; // 0-30 Hari kesehatan fisik terganggu
-  diffWalk: number; // 0 = Tidak, 1 = Ya (Kesulitan Berjalan/Tangga)
-  anyHealthcare: number; // 0 = Tidak, 1 = Punya Asuransi Kesehatan
-  noDocbcCost: number; // 0 = Tidak, 1 = Terkendala Biaya Dokter
+  // Extended fields (for richer ML model)
+  systolicBP?: number; // Tekanan darah sistolik (mmHg)
+  diastolicBP?: number; // Tekanan darah diastolik (mmHg)
+  glucoseLevel?: number; // Kadar glukosa (mg/dL)
+  familyDiabetes?: number; // 0 = Tidak, 1 = Ya (riwayat diabetes keluarga)
+
+  // Computed
+  ageCategory?: number; // BRFSS 1-13
 }
 
 export interface CalculatedBMI {
   bmi: number;
-  category: 'Underweight' | 'Normal' | 'Overweight' | 'Obese';
+  category: 'Underweight' | 'Normal' | 'Overweight' | 'Obese I' | 'Obese II';
+  color: string;
 }
 
 export interface RiskFactor {
   id: string;
   name: string;
   nameId: string;
-  impactScore: number; // 0 - 100
-  category: 'Klinis' | 'Gaya Hidup' | 'Kesehatan Umum';
+  impactScore: number; // 0-100
+  category: 'Klinis' | 'Gaya Hidup' | 'Kesehatan Umum' | 'Demografi';
   status: 'Critical' | 'Warning' | 'Good';
   description: string;
   recommendation: string;
@@ -49,27 +56,46 @@ export interface RiskFactor {
 
 export interface RadarMetric {
   subject: string;
-  score: number; // 0 - 100
+  score: number; // 0-100
   fullMark: number;
 }
 
 export interface PreventionTarget {
   id: string;
   title: string;
+  icon: string;
   sdgTarget: string;
   action: string;
-  icon: string;
+  priority: 'high' | 'medium' | 'low';
 }
 
 export interface ScreeningResult {
+  id: string;
   timestamp: string;
   bmiInfo: CalculatedBMI;
-  diabetesRiskProb: number; // 0 - 100%
-  cvdRiskProb: number; // 0 - 100% (Cardiovascular Disease Risk)
+  diabetesRiskProb: number; // 0-100%
+  cvdRiskProb: number; // 0-100%
   overallRiskLevel: 'Rendah' | 'Sedang' | 'Tinggi';
-  riskScore: number; // 0 - 100
+  riskScore: number; // 0-100
   topRiskFactors: RiskFactor[];
   radarMetrics: RadarMetric[];
   preventionPlan: PreventionTarget[];
   inputSummary: ClinicalDataInput;
+  healthInsight: string;
+}
+
+export interface HistoryEntry {
+  id: string;
+  date: string;
+  diabetesRisk: number;
+  cvdRisk: number;
+  overallRisk: 'Rendah' | 'Sedang' | 'Tinggi';
+  bmi: number;
+}
+
+export interface DemoProfile {
+  id: 'low' | 'moderate' | 'high';
+  label: string;
+  description: string;
+  data: ClinicalDataInput;
 }

@@ -1,62 +1,76 @@
 'use client';
 
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid } from 'recharts';
 import { RiskFactor } from '@/types/screening';
 
 interface Props {
   factors: RiskFactor[];
 }
 
-export function FeatureImportanceBarChart({ factors }: Props) {
-  // Take top 5 risk factors and prepare data
-  const chartData = factors.slice(0, 5).map((f) => ({
-    name: f.nameId,
-    impact: f.impactScore,
-    status: f.status,
-    category: f.category,
-  }));
+function getBarColor(score: number, status: string): string {
+  if (status === 'Critical') return '#ef4444';
+  if (status === 'Warning') return '#f59e0b';
+  return '#10b981';
+}
 
-  const getBarColor = (status: string) => {
-    if (status === 'Critical') return '#f43f5e'; // Rose/Red
-    if (status === 'Warning') return '#f59e0b';  // Amber/Yellow
-    return '#10b981';                            // Emerald/Green
-  };
+function getStatusLabel(status: string): string {
+  if (status === 'Critical') return 'Kritis';
+  if (status === 'Warning') return 'Perhatian';
+  return 'Baik';
+}
+
+export function FeatureImportanceBarChart({ factors }: Props) {
+  const maxScore = Math.max(...factors.map((f) => f.impactScore), 1);
 
   return (
-    <div className="w-full h-[320px]">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart
-          layout="vertical"
-          data={chartData}
-          margin={{ top: 10, right: 30, left: 20, bottom: 10 }}
-        >
-          <CartesianGrid strokeDasharray="3 3" stroke="#334155" horizontal={false} />
-          <XAxis type="number" domain={[0, 100]} tick={{ fill: '#64748b', fontSize: 11 }} />
-          <YAxis
-            type="category"
-            dataKey="name"
-            width={170}
-            tick={{ fill: '#cbd5e1', fontSize: 11, fontWeight: 500 }}
-          />
-          <Tooltip
-            cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
-            contentStyle={{
-              backgroundColor: '#0f172a',
-              borderColor: '#334155',
-              borderRadius: '0.75rem',
-              color: '#f8fafc',
-              fontSize: '12px',
-            }}
-            formatter={(val: any) => [`${val}% Kontribusi SHAP`, 'Tingkat Dampak Risiko']}
-          />
-          <Bar dataKey="impact" radius={[0, 8, 8, 0]} barSize={22}>
-            {chartData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={getBarColor(entry.status)} />
-            ))}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
+    <div className="space-y-4">
+      {factors.map((factor, idx) => {
+        const color = getBarColor(factor.impactScore, factor.status);
+        const widthPct = (factor.impactScore / 100) * 100;
+
+        return (
+          <div key={factor.id} className="space-y-1.5">
+            <div className="flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-[10px] font-bold text-slate-500 w-4 shrink-0">#{idx + 1}</span>
+                <span className="font-semibold text-slate-200 truncate">{factor.nameId}</span>
+                <span
+                  className="px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0"
+                  style={{ color, background: `${color}20` }}
+                >
+                  {getStatusLabel(factor.status)}
+                </span>
+              </div>
+              <span className="font-black text-white ml-2 shrink-0">{factor.impactScore}%</span>
+            </div>
+
+            <div className="relative w-full h-2.5 rounded-full bg-slate-800 overflow-hidden">
+              <div
+                className="absolute left-0 top-0 h-full rounded-full transition-all duration-1000"
+                style={{
+                  width: `${widthPct}%`,
+                  background: `linear-gradient(90deg, ${color}cc, ${color})`,
+                  boxShadow: `0 0 8px ${color}40`,
+                }}
+              />
+            </div>
+          </div>
+        );
+      })}
+
+      {/* Legend */}
+      <div className="flex items-center gap-4 pt-2 border-t border-white/[0.05]">
+        {[
+          { color: '#ef4444', label: 'Kritis' },
+          { color: '#f59e0b', label: 'Perhatian' },
+          { color: '#10b981', label: 'Baik' },
+        ].map((l) => (
+          <div key={l.label} className="flex items-center gap-1.5 text-[11px] text-slate-400">
+            <div className="h-2.5 w-2.5 rounded-full" style={{ background: l.color }} />
+            {l.label}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

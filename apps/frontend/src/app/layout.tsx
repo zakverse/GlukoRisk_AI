@@ -1,29 +1,39 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
-  title: "GlukoRisk AI - Skrining Risiko Diabetes & Kardiovaskular Berbasis AI",
-  description: "Platform kalkulator dan skrining risiko diabetes melitus tipe-2 dan penyakit kardiovaskular preventif berbasis Machine Learning (BRFSS 2015).",
+  title: "MediRisk AI — Skrining Risiko Diabetes & Kardiovaskular",
+  description:
+    "Platform skrining preventif berbasis AI untuk membantu memahami faktor risiko diabetes dan penyakit kardiovaskular. Dukung SDG 3 – Kehidupan Sehat & Sejahtera.",
+  keywords: "skrining diabetes, risiko kardiovaskular, AI kesehatan, preventif, SDG 3",
+  openGraph: {
+    title: "MediRisk AI — Skrining Risiko Kesehatan",
+    description: "Skrining preventif berbasis AI untuk risiko diabetes & kardiovaskular.",
+    type: "website",
+  },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="id" className="h-full" data-scroll-behavior="smooth">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body
+        className="min-h-full flex flex-col"
+        style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
+      >
+        {children}
+      </body>
     </html>
   );
 }

@@ -4,222 +4,259 @@ import React from 'react';
 import { ScreeningResult } from '@/types/screening';
 import { RiskRadarChart } from './visualizations/RiskRadarChart';
 import { FeatureImportanceBarChart } from './visualizations/FeatureImportanceBarChart';
+import { RiskGauge } from './visualizations/RiskGauge';
 import { ExportPDFButton } from './ExportPDFButton';
-import { ShieldAlert, Activity, HeartPulse, RefreshCw, Sparkles, CheckCircle2, AlertTriangle, Info, ArrowUpRight } from 'lucide-react';
+import {
+  Activity, HeartPulse, RefreshCw, Sparkles, CheckCircle2,
+  AlertTriangle, Info, ArrowRight, Shield, Lightbulb,
+} from 'lucide-react';
+import Link from 'next/link';
 
 interface Props {
   result: ScreeningResult;
   onReset: () => void;
 }
 
-export function RiskResultDashboard({ result, onReset }: Props) {
-  const getRiskBadge = (level: ScreeningResult['overallRiskLevel']) => {
-    if (level === 'Tinggi') {
-      return (
-        <span className="px-3.5 py-1.5 rounded-full text-xs font-black tracking-wider uppercase bg-rose-500/20 border border-rose-500/40 text-rose-300 flex items-center gap-1.5">
-          <AlertTriangle className="h-4 w-4 text-rose-400" /> Kategori Risiko Tinggi
-        </span>
-      );
-    }
-    if (level === 'Sedang') {
-      return (
-        <span className="px-3.5 py-1.5 rounded-full text-xs font-black tracking-wider uppercase bg-amber-500/20 border border-amber-500/40 text-amber-300 flex items-center gap-1.5">
-          <Info className="h-4 w-4 text-amber-400" /> Kategori Risiko Sedang
-        </span>
-      );
-    }
-    return (
-      <span className="px-3.5 py-1.5 rounded-full text-xs font-black tracking-wider uppercase bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 flex items-center gap-1.5">
-        <CheckCircle2 className="h-4 w-4 text-emerald-400" /> Kategori Risiko Rendah
-      </span>
-    );
+function getRiskConfig(level: ScreeningResult['overallRiskLevel']) {
+  if (level === 'Tinggi') {
+    return {
+      color: '#ef4444',
+      bg: 'rgba(239,68,68,0.08)',
+      border: 'rgba(239,68,68,0.2)',
+      badge: 'badge-high',
+      icon: AlertTriangle,
+      label: 'Estimasi Risiko Tinggi',
+    };
+  }
+  if (level === 'Sedang') {
+    return {
+      color: '#f59e0b',
+      bg: 'rgba(245,158,11,0.08)',
+      border: 'rgba(245,158,11,0.2)',
+      badge: 'badge-moderate',
+      icon: Info,
+      label: 'Estimasi Risiko Sedang',
+    };
+  }
+  return {
+    color: '#10b981',
+    bg: 'rgba(16,185,129,0.08)',
+    border: 'rgba(16,185,129,0.2)',
+    badge: 'badge-low',
+    icon: CheckCircle2,
+    label: 'Estimasi Risiko Rendah',
   };
+}
+
+export function RiskResultDashboard({ result, onReset }: Props) {
+  const riskConfig = getRiskConfig(result.overallRiskLevel);
+  const RiskIcon = riskConfig.icon;
 
   return (
-    <div className="space-y-8 animate-fadeIn">
-      {/* Top Header Actions */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800 pb-6">
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <div className="flex items-center gap-3">
-            <h2 className="text-2xl font-black text-white">Hasil Analisis Riset ML & Health Assessment</h2>
-            {getRiskBadge(result.overallRiskLevel)}
+          <div className="flex items-center flex-wrap gap-3 mb-1">
+            <h1 className="text-2xl font-black text-white">Hasil Skrining Kesehatan</h1>
+            <span className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 ${riskConfig.badge}`}>
+              <RiskIcon className="h-3.5 w-3.5" />
+              {riskConfig.label}
+            </span>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
-            Waktu Pemeriksaan: <span className="text-slate-300 font-semibold">{result.timestamp}</span> • Berdasarkan Model XGBoost BRFSS 2015
+          <p className="text-xs text-slate-400">
+            {result.timestamp} • Analisis berbasis model Machine Learning BRFSS 2015
           </p>
         </div>
-
-        <div className="flex items-center gap-3 w-full sm:w-auto">
+        <div className="flex items-center gap-3 w-full sm:w-auto flex-wrap">
           <button
             onClick={onReset}
-            className="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs flex items-center gap-2 border border-slate-700 transition-all"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-300 glass-card border border-white/10 hover:border-white/20 hover:text-white transition-all"
           >
-            <RefreshCw className="h-3.5 w-3.5" /> Skrining Ulang
+            <RefreshCw className="h-4 w-4" />
+            Skrining Ulang
           </button>
-          <ExportPDFButton elementId="screening-pdf-report" />
+          <ExportPDFButton elementId="pdf-report-content" />
         </div>
       </div>
 
-      {/* Target printable PDF container wrapper */}
-      <div id="screening-pdf-report" className="space-y-8 p-6 rounded-3xl bg-slate-950/80 border border-slate-800/80 shadow-2xl">
-        {/* PDF Header Logo inside report */}
-        <div className="hidden print:flex items-center justify-between pb-4 border-b border-slate-800">
-          <div>
-            <h1 className="text-xl font-bold text-teal-400">GlukoRisk AI - Laporan Skrining Kesehatan Preventif</h1>
-            <p className="text-xs text-slate-400">Poin SDG 3: Kehidupan Sehat & Sejahtera (UN Sustainable Development Goals)</p>
-          </div>
-          <p className="text-xs text-slate-400">{result.timestamp}</p>
-        </div>
-
-        {/* Probabilities Gauges Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Card 1: Probabilitas Diabetes */}
-          <div className="p-6 rounded-2xl glass-card border border-teal-500/30 bg-gradient-to-b from-teal-950/30 via-slate-900 to-slate-950 relative overflow-hidden">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-teal-400 uppercase tracking-wider">Risiko Diabetes Tipe-2</span>
-              <Activity className="h-5 w-5 text-teal-400" />
+      {/* Printable content */}
+      <div id="pdf-report-content" className="space-y-8">
+        {/* ---- Risk Score Cards ---- */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {/* Diabetes Gauge */}
+          <div className="p-6 rounded-2xl flex flex-col items-center gap-4 text-center" style={{ background: 'rgba(14,165,233,0.06)', border: '1px solid rgba(14,165,233,0.15)' }}>
+            <RiskGauge
+              percentage={result.diabetesRiskProb}
+              color="#0ea5e9"
+              label="Diabetes"
+              sublabel="Estimasi risiko diabetes tipe 2"
+            />
+            <div className="w-full space-y-1">
+              <p className="text-xs font-bold text-sky-400 uppercase tracking-wider">Risiko Diabetes Tipe-2</p>
+              <div className="h-1.5 rounded-full bg-slate-800 overflow-hidden">
+                <div className="h-full rounded-full" style={{ width: `${result.diabetesRiskProb}%`, background: 'linear-gradient(90deg, #0ea5e9, #14b8a6)' }} />
+              </div>
+              <p className="text-[11px] text-slate-400">
+                {result.diabetesRiskProb >= 55 ? 'Estimasi risiko tinggi — konsultasikan ke dokter' :
+                 result.diabetesRiskProb >= 30 ? 'Estimasi risiko sedang — perlu perhatian' :
+                 'Estimasi risiko rendah — pertahankan gaya hidup sehat'}
+              </p>
             </div>
-            <div className="mt-4 flex items-baseline justify-between">
-              <span className="text-4xl font-black text-white tracking-tight">{result.diabetesRiskProb}%</span>
-              <span className="text-xs text-slate-400">Probabilitas ML</span>
-            </div>
-            {/* Meter Bar */}
-            <div className="w-full h-2 bg-slate-800 rounded-full mt-3 overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-teal-400 to-sky-400 rounded-full transition-all duration-1000"
-                style={{ width: `${result.diabetesRiskProb}%` }}
-              />
-            </div>
-            <p className="text-[11px] text-slate-400 mt-3 leading-relaxed">
-              Berdasarkan perpaduan indikator tekanan darah, BMI ({result.bmiInfo.bmi}), dan tingkat glukosa/gaya hidup.
-            </p>
           </div>
 
-          {/* Card 2: Probabilitas Penyakit Kardiovaskular (CVD) */}
-          <div className="p-6 rounded-2xl glass-card border border-sky-500/30 bg-gradient-to-b from-sky-950/30 via-slate-900 to-slate-950 relative overflow-hidden">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-sky-400 uppercase tracking-wider">Risiko Kardiovaskular (Jantung)</span>
-              <HeartPulse className="h-5 w-5 text-sky-400" />
+          {/* CVD Gauge */}
+          <div className="p-6 rounded-2xl flex flex-col items-center gap-4 text-center" style={{ background: 'rgba(20,184,166,0.06)', border: '1px solid rgba(20,184,166,0.15)' }}>
+            <RiskGauge
+              percentage={result.cvdRiskProb}
+              color="#14b8a6"
+              label="Kardio"
+              sublabel="Estimasi risiko kardiovaskular"
+            />
+            <div className="w-full space-y-1">
+              <p className="text-xs font-bold text-teal-400 uppercase tracking-wider">Risiko Kardiovaskular</p>
+              <div className="h-1.5 rounded-full bg-slate-800 overflow-hidden">
+                <div className="h-full rounded-full" style={{ width: `${result.cvdRiskProb}%`, background: 'linear-gradient(90deg, #14b8a6, #6366f1)' }} />
+              </div>
+              <p className="text-[11px] text-slate-400">
+                {result.cvdRiskProb >= 55 ? 'Estimasi risiko tinggi — perlu evaluasi kardio' :
+                 result.cvdRiskProb >= 30 ? 'Estimasi risiko sedang — pantau faktor risiko' :
+                 'Estimasi risiko rendah — teruskan kebiasaan baik'}
+              </p>
             </div>
-            <div className="mt-4 flex items-baseline justify-between">
-              <span className="text-4xl font-black text-white tracking-tight">{result.cvdRiskProb}%</span>
-              <span className="text-xs text-slate-400">Probabilitas ML</span>
-            </div>
-            {/* Meter Bar */}
-            <div className="w-full h-2 bg-slate-800 rounded-full mt-3 overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-sky-400 to-indigo-500 rounded-full transition-all duration-1000"
-                style={{ width: `${result.cvdRiskProb}%` }}
-              />
-            </div>
-            <p className="text-[11px] text-slate-400 mt-3 leading-relaxed">
-              Estimasi keterpaparan plak arteri, ketegangan sistem pembuluh darah, dan faktor riwayat klinis.
-            </p>
           </div>
 
-          {/* Card 3: Summary Kategori & BMI */}
-          <div className="p-6 rounded-2xl glass-card border border-slate-800 bg-gradient-to-b from-slate-900 to-slate-950 flex flex-col justify-between">
+          {/* Summary Card */}
+          <div className="p-6 rounded-2xl space-y-4" style={{ background: `${riskConfig.color}08`, border: `1px solid ${riskConfig.border}` }}>
             <div>
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Indeks Massa Tubuh (BMI)</span>
+              <p className="text-xs font-bold uppercase tracking-wider" style={{ color: riskConfig.color }}>Profil Risiko Keseluruhan</p>
               <div className="mt-2 flex items-baseline gap-2">
-                <span className="text-3xl font-black text-white">{result.bmiInfo.bmi}</span>
+                <span className="text-5xl font-black text-white">{result.riskScore}</span>
+                <span className="text-lg text-slate-400">/100</span>
+              </div>
+              <div className={`mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${riskConfig.badge}`}>
+                <RiskIcon className="h-3.5 w-3.5" />
+                {result.overallRiskLevel}
+              </div>
+            </div>
+            <div className="border-t border-white/[0.06] pt-4 space-y-2">
+              <p className="text-xs font-bold text-slate-400">BMI</p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-black text-white">{result.bmiInfo.bmi}</span>
                 <span className="text-xs text-slate-400">kg/m²</span>
-                <span className="text-xs font-bold text-teal-400 ml-auto bg-teal-950 border border-teal-500/30 px-2 py-0.5 rounded-lg">
+                <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ color: result.bmiInfo.color, background: `${result.bmiInfo.color}20` }}>
                   {result.bmiInfo.category}
                 </span>
               </div>
             </div>
-            <div className="pt-4 border-t border-slate-800/80 mt-4">
-              <span className="text-xs font-bold text-slate-400">Persepsi Fisik BRFSS</span>
-              <p className="text-xs text-slate-300 font-semibold mt-1">
-                Kondisi Fisik Terganggu: <span className="text-teal-300 font-bold">{result.inputSummary.physHlth} Hari/Bln</span>
-              </p>
+          </div>
+        </div>
+
+        {/* ---- Health Insight ---- */}
+        <div className="p-6 rounded-2xl" style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.15)' }}>
+          <div className="flex items-start gap-3">
+            <div className="h-9 w-9 rounded-xl bg-indigo-500/15 flex items-center justify-center shrink-0">
+              <Lightbulb className="h-4 w-4 text-indigo-400" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
+                Apa Artinya?
+                <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
+                  Wawasan Kesehatan
+                </span>
+              </h3>
+              <p className="text-sm text-slate-300 leading-relaxed">{result.healthInsight}</p>
             </div>
           </div>
         </div>
 
-        {/* Charts Section: Radar Chart & Feature Importance Bar Chart */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Radar Chart: Profil Kebugaran Health Attributes */}
-          <div className="p-6 rounded-2xl glass-card border border-slate-800 bg-slate-900/60">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-teal-400" /> Profil Kebugaran & Risiko (Radar Chart)
-                </h3>
-                <p className="text-xs text-slate-400 mt-0.5">Makin mendekati area luar (100), semakin ideal kondisi kesehatan.</p>
-              </div>
+        {/* ---- Charts ---- */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="p-6 rounded-2xl glass-card border border-white/[0.06]">
+            <div className="mb-4">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-teal-400" /> Profil Risiko (Radar)
+              </h3>
+              <p className="text-xs text-slate-400 mt-0.5">Semakin tinggi skor, semakin ideal kondisi tersebut.</p>
             </div>
             <RiskRadarChart data={result.radarMetrics} />
           </div>
 
-          {/* Bar Chart: SHAP Feature Importances */}
-          <div className="p-6 rounded-2xl glass-card border border-slate-800 bg-slate-900/60">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <ShieldAlert className="h-4 w-4 text-rose-400" /> Faktor Pemicu Utama (SHAP Feature Importance)
-                </h3>
-                <p className="text-xs text-slate-400 mt-0.5">Persentase kontribusi variabel dalam menaikkan probabilitas risiko.</p>
-              </div>
+          <div className="p-6 rounded-2xl glass-card border border-white/[0.06]">
+            <div className="mb-4">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <Activity className="h-4 w-4 text-rose-400" /> Faktor Pemicu Utama
+              </h3>
+              <p className="text-xs text-slate-400 mt-0.5">Kontribusi setiap faktor terhadap peningkatan risiko.</p>
             </div>
             <FeatureImportanceBarChart factors={result.topRiskFactors} />
           </div>
         </div>
 
-        {/* Detailed Risk Trigger Factors List */}
-        <div className="p-6 rounded-2xl glass-card border border-slate-800">
-          <h3 className="text-base font-bold text-white mb-4 flex items-center gap-2">
-            <Activity className="h-5 w-5 text-sky-400" /> Analisis Detail Faktor Risiko & Rekomendasi Klinis
+        {/* ---- Risk Factor Details ---- */}
+        <div className="p-6 rounded-2xl glass-card border border-white/[0.06]">
+          <h3 className="text-sm font-bold text-white mb-5 flex items-center gap-2">
+            <HeartPulse className="h-4 w-4 text-sky-400" />
+            Analisis Detail Faktor Risiko
           </h3>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {result.topRiskFactors.map((factor) => (
-              <div key={factor.id} className="p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-extrabold text-white flex items-center gap-2">
-                    <span className={`h-2.5 w-2.5 rounded-full ${
-                      factor.status === 'Critical' ? 'bg-rose-500 animate-pulse' :
-                      factor.status === 'Warning' ? 'bg-amber-400' : 'bg-emerald-400'
-                    }`} />
-                    {factor.nameId}
-                  </span>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
-                    Dampak: {factor.impactScore}%
-                  </span>
+            {result.topRiskFactors.map((factor) => {
+              const statusColor = factor.status === 'Critical' ? '#ef4444' : factor.status === 'Warning' ? '#f59e0b' : '#10b981';
+              return (
+                <div key={factor.id} className="p-4 rounded-xl border space-y-3" style={{ background: `${statusColor}05`, borderColor: `${statusColor}20` }}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className={`h-2 w-2 rounded-full ${factor.status === 'Critical' ? 'animate-pulse' : ''}`} style={{ background: statusColor }} />
+                      <span className="text-sm font-bold text-white">{factor.nameId}</span>
+                    </div>
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ color: statusColor, background: `${statusColor}20` }}>
+                      {factor.impactScore}%
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400 leading-relaxed">{factor.description}</p>
+                  <div className="p-2.5 rounded-lg text-xs flex items-start gap-2" style={{ background: 'rgba(14,165,233,0.08)', border: '1px solid rgba(14,165,233,0.15)' }}>
+                    <ArrowRight className="h-3.5 w-3.5 text-sky-400 mt-0.5 shrink-0" />
+                    <span className="text-sky-300">{factor.recommendation}</span>
+                  </div>
                 </div>
-                <p className="text-xs text-slate-400 leading-relaxed">{factor.description}</p>
-                <div className="p-2.5 rounded-lg bg-teal-950/40 border border-teal-500/20 text-xs text-teal-300 font-medium flex items-start gap-2">
-                  <ArrowUpRight className="h-4 w-4 text-teal-400 shrink-0 mt-0.5" />
-                  <span><strong>Saran Tindakan:</strong> {factor.recommendation}</span>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ---- Prevention Plan ---- */}
+        <div className="p-6 rounded-2xl" style={{ background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.15)' }}>
+          <div className="flex items-center gap-3 mb-5">
+            <div className="h-9 w-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-black text-sm shadow-lg">3</div>
+            <div>
+              <h3 className="text-sm font-bold text-white">Rencana Preventif (SDG 3)</h3>
+              <p className="text-xs text-slate-400">Rekomendasi personal berdasarkan profil risiko Anda.</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {result.preventionPlan.map((plan) => (
+              <div key={plan.id} className="p-4 rounded-xl glass-card border border-emerald-500/15 space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">{plan.icon}</span>
+                  <div>
+                    <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">{plan.sdgTarget}</span>
+                    <h4 className="text-sm font-bold text-white">{plan.title}</h4>
+                  </div>
                 </div>
+                <p className="text-xs text-slate-300 leading-relaxed">{plan.action}</p>
               </div>
             ))}
           </div>
         </div>
 
-        {/* SDG 3 Prevention Plan Section */}
-        <div className="p-6 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-teal-950/30 to-slate-900 border border-emerald-500/30">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="h-8 w-8 rounded-lg bg-emerald-600 flex items-center justify-center font-bold text-white text-sm">
-              3
-            </div>
-            <div>
-              <h3 className="text-base font-bold text-white">Rencana Aksi Preventif (Target SDG 3 UN)</h3>
-              <p className="text-xs text-slate-400">Rekomendasi gaya hidup untuk menjaga kesehatan kardiovaskular jangka panjang.</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {result.preventionPlan.map((plan) => (
-              <div key={plan.id} className="p-4 rounded-xl glass-card border border-emerald-500/20 space-y-2">
-                <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider bg-emerald-950 px-2 py-0.5 rounded border border-emerald-500/30">
-                  {plan.sdgTarget}
-                </span>
-                <h4 className="text-xs font-bold text-white mt-1">{plan.title}</h4>
-                <p className="text-xs text-slate-300 leading-relaxed">{plan.action}</p>
-              </div>
-            ))}
+        {/* ---- Disclaimer ---- */}
+        <div className="p-5 rounded-2xl" style={{ background: 'rgba(245,158,11,0.05)', border: '1px solid rgba(245,158,11,0.15)' }}>
+          <div className="flex items-start gap-3">
+            <Shield className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+            <p className="text-xs text-slate-400 leading-relaxed">
+              <span className="font-semibold text-amber-400">Perhatian: </span>
+              Hasil ini merupakan estimasi skrining berbasis data dan <strong className="text-slate-300">bukan diagnosis medis</strong>. Untuk interpretasi kondisi kesehatan dan tindakan lebih lanjut, konsultasikan dengan tenaga kesehatan yang berkompeten. Dataset: BRFSS 2015 (CDC) — tidak menggantikan pemeriksaan klinis.
+            </p>
           </div>
         </div>
       </div>
