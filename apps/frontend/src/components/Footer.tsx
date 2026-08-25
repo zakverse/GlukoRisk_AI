@@ -4,7 +4,6 @@ import { HeartPulse, Shield } from 'lucide-react';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
-
   return (
     <footer className="mt-24 border-t border-white/[0.06]" style={{ background: 'rgba(6, 12, 26, 0.95)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
