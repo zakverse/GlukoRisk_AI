@@ -10,7 +10,6 @@ interface Props {
 
 export function ExportPDFButton({ elementId, filename = 'MediRisk-AI-Laporan-Skrining' }: Props) {
   const [loading, setLoading] = useState(false);
-
   const handleExport = async () => {
     setLoading(true);
     try {
@@ -96,11 +95,10 @@ export function ExportPDFButton({ elementId, filename = 'MediRisk-AI-Laporan-Skr
     <button
       onClick={handleExport}
       disabled={loading}
-      className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all border ${
-        loading
+      className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all border ${loading
           ? 'opacity-60 cursor-not-allowed border-white/10 text-slate-400'
           : 'border-sky-500/30 text-sky-300 hover:bg-sky-500/10 hover:border-sky-500/50 hover:text-sky-200'
-      }`}
+        }`}
     >
       {loading ? (
         <><Loader2 className="h-4 w-4 animate-spin" /> Mengunduh...</>
